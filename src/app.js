@@ -1,37 +1,17 @@
 import express from "express"
-
-import ProductManager from "../ProductManager.js"
+import productsRouter from "./routes/product.router.js"
+import cartsRouter from "./routes/cart.router.js"
+import __dirname from "./utils.js"
 
 const app = express()
 
-const manager = new ProductManager()
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use("/", express.static(`${__dirname}/public`))
 
-app.listen(8080, () => {
+app.use("/api/products", productsRouter)
+app.use("/api/carts", cartsRouter)
+
+app.listen(8080, (req, res) => {
   console.log("Server is running...")
-})
-
-app.get("/products", async (req, res) => {
-  const { limit } = req.query
-
-  const products = await manager.getProducts()
-
-  if (!limit) {
-    return res.send({ products: products })
-  }
-
-  const limitedProducts = products.slice(0, limit)
-
-  res.send({ products: limitedProducts })
-})
-
-app.get("/products/:pid", async (req, res) => {
-  const { pid } = req.params
-
-  if (!pid) {
-    return res.send({ error: "You must specify a product id" })
-  }
-
-  const product = await manager.getProductById(+pid)
-
-  res.send(product)
 })
